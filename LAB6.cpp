@@ -12,47 +12,98 @@
 #include <cstdlib>
 using namespace std;
 
-void CheckCrash(bool& crash, int count, int Me_Row, int Me_Col, int Mon_Row[], int Mon_Col[]);
+bool CheckCrash(bool crash, int count, int MePosition[], int Mon_Row[], int Mon_Col[]);
 void NewMonster(int Mon_Row[], int Mon_Col[], int count, int Me_Row, int Me_Col);
 void MoveMonster(int Mon_Row[], int Mon_Col[], int count);
-//void MoveMonster2(int Mon_Row[], int Mon_Col[], int count, int Mel_Row, int Mel_Col);
-char Move(int Mon_Row[], int Mon_Col[], int count, int& Me_Row, int& Me_Col, int& count_b);
-void Construct(int Map[][15],int Mon_Row[], int Mon_Col[], int count, int& Me_Row, int& Me_Col);
-void Display(int Map[][15],int Mon_Row[], int Mon_Col[], int count, int& Me_Row, int& Me_Col);
+void Move(int MePosition[], int count, int Mon_Row[], int Mon_Col[], int& count_b);
+//int CountNum(int Mon_Row[], int Mon_Col[], int count, int row, int col);
+void Display(int Map[][15], int Mon_Row[], int Mon_Col[], int count, int MePosition[]);
+void Construct(int Map[][15],int Mon_Row[], int Mon_Col[], int count, int MePosition[], bool get_d);
+
 
 int main() {
 	srand(time(NULL));
-	// Evil Monsters[225];
-	int Mon_Row[225], Mon_Col[225], Me_Row=14, Me_Col=0;
-	int count = 0;
-	int count_b=0; // number of bombs
-	char dir;
-	bool crash = false;
-	int Map[15][15];
+	// Initialize variables
+	int Mon_Row[225], Mon_Col[225], map[15][15],MePosition[2]={14, 0};
+	int count = 0, count_b=0;
+	bool crash = false, get_d = false;
+	// Initialize arrays
+	for (int m=0; m<225;m++){
+		Mon_Row[m]=111;
+		Mon_Col[m]=111;
+	}
 
-	Construct(Map,Mon_Row,Mon_Col,count,Me_Row, Me_Col);
-	Display(Map,Mon_Row, Mon_Col,count,Me_Row,Me_Col);
+	cout<<"Welcome!!! Welcome the Purple Minion Maze!"<<endl;
+	cout<<"Your fellow minions have been injected a kind of virus and thus became purple and evil."<<endl;
+	cout<<"Your mission is to get the virus sample denoted by \"8\" back to Glu and Dr. Nefario,"<<endl;
+	cout<<"so that they can make the Antidote and save them."<<endl;
+	cout<<"In this game, you are given the symbol \"9\"."<<endl;
+	cout<<"However, in this maze, evil minions are everywhere and you need to watch out!!!"<<endl;
+	cout<<"You and the evil minions can move only in 4 directions by themselves by one box."<<endl;
+	cout<<"Each step you take, there will be one more evil minion appears and other minions will move randomly by one box!"<<endl;
+	cout<<"Glu is worried that they may hurt you, so he has given you three bombs."<<endl;
+	cout<<"Once you have use the bomb, each evil minion will move away from you by one box."<<endl;
 
-	while (crash == false){
-		//MoveMonster2(Mon_Row, Mon_Col, count, Me_Row, Me_Col);
+	while (crash==false) {
 
-		dir=Move(Mon_Row, Mon_Col, count, Me_Row, Me_Col, count_b); // cin direction or bomb
-		// in normal situation
-		if (dir!='b'){
-			cout<<"count: "<<count;
-			NewMonster(Mon_Row, Mon_Col, count, Me_Row, Me_Col);
-			count=count+1; cout<<"count: "<<count;
-			MoveMonster(Mon_Row, Mon_Col,count);
+
+
+		if (count!=0){
+			MoveMonster(Mon_Row, Mon_Col, count-1);
+			//cout<<"Move Monster Done"<<endl;
 		}
-		// check crash
-		CheckCrash(crash, count, Me_Row, Me_Col, Mon_Row, Mon_Col);
-		if(crash == true){
-			cout<<"Bomb!!!"<<endl;
+
+		NewMonster(Mon_Row, Mon_Col, count, MePosition[0], MePosition[1]);
+		//cout<<"NewMonster Done"<<endl;
+		crash=CheckCrash(crash, count, MePosition, Mon_Row, Mon_Col);
+		Construct(map, Mon_Row, Mon_Col, count, MePosition, get_d);
+		Display(map, Mon_Row, Mon_Col, count, MePosition);
+		//cout<<"crash is "<<crash<<endl;
+
+		if (crash==true){
+			cout<<"Gosh! You are hurt by the evil minion!"<<endl;
+			cout<<"It seems that Glu has to send someone else to get the virus!"<<endl;
 			break;
 		}
-		Construct(Map,Mon_Row,Mon_Col,count,Me_Row, Me_Col);
-		Display(Map,Mon_Row, Mon_Col,count,Me_Row,Me_Col); //make a display
+		else {
+			Move(MePosition, count,  Mon_Row, Mon_Col, count_b);
+			if ((MePosition[0]==0)&&(MePosition[1]==14)){
+				cout<<"Wooow, you got the virus! Your fellow minions have a chance to recover!"<<endl;
+				get_d=true;
+			}
+			Construct(map, Mon_Row, Mon_Col, count, MePosition, get_d);
+			Display(map, Mon_Row, Mon_Col, count, MePosition);
+			crash=CheckCrash(crash, count, MePosition, Mon_Row, Mon_Col);
+			//cout<<"crash is "<<crash<<endl;
+			if (crash==false){
+				if ((MePosition[0]==14)&&(MePosition[1]==0)&&(get_d==true)){
+					cout<<"You are a Hero!\nIt is such a surprise that you can bring the virus back!"<<endl;
+					break;
+				}
+			}
+			else {
+				cout<<"Gosh! You are hurt by the evil minion!"<<endl;
+				cout<<"It seems that Glu has to send someone else to get the virus!"<<endl;
+				break;
+			}
+		}
+
+		count=count+1;
+		//cout<<"count is "<<count<<endl;
+		/*
+		cout<<"Mon_Row: ";
+		for (int a=0; a<count; a++){
+			cout<<Mon_Row[a]<<"  ";
+		}
+		cout<<endl;
+		cout<<"Mon_Col: ";
+		for (int b=0; b<count; b++){
+			cout<<Mon_Col[b]<<"  ";
+		}
+		cout<<endl;
+		*/
+
 	}
 	return 0;
-}
 
+}
